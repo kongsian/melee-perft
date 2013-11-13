@@ -28,6 +28,7 @@
 //  includes
 //--------------------------------------------------------------------//
 
+#include "bit.h"
 #include "program.h"
 
 #include <iostream>
@@ -44,4 +45,8 @@ int main()
               << " by "
               << Program::Author
               << std::endl;
+
+    //  inits
+
+    Bit::init();
 }
