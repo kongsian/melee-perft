@@ -29,6 +29,7 @@
 //--------------------------------------------------------------------//
 
 #include "bit.h"
+#include "magic.h"
 #include "program.h"
 
 #include <iostream>
@@ -48,5 +49,6 @@ int main()
 
     //  inits
 
-    Bit::init();
+    Bit::init  ();
+    Magic::init();
 }
