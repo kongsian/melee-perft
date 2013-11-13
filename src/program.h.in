@@ -1,0 +1,48 @@
+//--------------------------------------------------------------------//
+//
+//  Melee Perft
+//  Copyright (C) 2013 Chua Kong Sian.
+//
+//  This file is part of Melee Perft.
+//
+//  Melee Perft is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  Melee Perft is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with Melee Perft.  If not, see <http://www.gnu.org/licenses/>.
+//
+//--------------------------------------------------------------------//
+
+//--------------------------------------------------------------------//
+//  program.h
+//--------------------------------------------------------------------//
+
+#ifndef PROGRAM_H
+#define PROGRAM_H
+
+//--------------------------------------------------------------------//
+//  includes
+//--------------------------------------------------------------------//
+
+#include <string>
+
+//--------------------------------------------------------------------//
+//  constants
+//--------------------------------------------------------------------//
+
+namespace Program
+{
+    const std::string Name    = "@PROJECT_NAME@";
+    const std::string Version = "@VERSION_MAJOR@.@VERSION_MINOR@";
+    const std::string Author  = "Chua Kong Sian"; 
+    const std::string Date    = "2013";
+}
+
+#endif  //  PROGRAM_H
