@@ -30,7 +30,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(Melee-Perft CXX)
-SET(VERSION_MAJOR 0)
+SET(VERSION_MAJOR 1)
 SET(VERSION_MINOR 00)
 
 ##--------------------------------------------------------------------##
