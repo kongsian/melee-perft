@@ -74,6 +74,8 @@ namespace Move
 //  prototypes
 //--------------------------------------------------------------------//
 
+class Board;
+
 namespace Move
 {
     constexpr move_t make       (const int from, const int to, const int flag=0);
@@ -85,6 +87,7 @@ namespace Move
     constexpr bool   isEnpassant(const move_t move);
     constexpr bool   isPawn2    (const move_t move);
     const std::string toString  (const move_t move);
+    const std::string toSan     (const move_t move, const Board& board);
 }
 
 //--------------------------------------------------------------------//

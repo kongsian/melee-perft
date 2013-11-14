@@ -80,6 +80,8 @@ public:
     bool   canCastleE8G8    () const;
     bool   canCastleE8C8    () const;
 
+    bit_t  getMyPieces      (const int piece) const;
+    bit_t  getOpPieces      (const int piece) const;
     bit_t  getMyPawns       () const;
     bit_t  getOpPawns       () const;
     bit_t  getMyKnights     () const;
@@ -202,6 +204,16 @@ inline bool Board::canCastleE8G8() const
 inline bool Board::canCastleE8C8() const
 {
     return Castle::canE8C8(m_castle);
+}
+
+inline bit_t Board::getMyPieces(const int piece) const
+{
+    return m_pieces_me[piece];
+}
+
+inline bit_t Board::getOpPieces(const int piece) const
+{
+    return m_pieces_op[piece];
 }
 
 inline bit_t Board::getMyPawns() const
