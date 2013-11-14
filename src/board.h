@@ -34,6 +34,7 @@
 #include "bit.h"
 #include "castle.h"
 #include "color.h"
+#include "key.h"
 #include "move.h"
 #include "piece.h"
 #include "square.h"
@@ -52,6 +53,7 @@ public:
         int captured;
         int castle;
         int enpassant;
+        Key key;
     };
 
     static const std::string StartFen;
@@ -69,6 +71,7 @@ public:
     int    getMe            () const;
     int    getOp            () const;
     int    getEnpassant     () const;
+    Key    getKey           () const;
     bool   isWhiteToMove    () const;
     bool   isBlackToMove    () const;
     bool   canCastleNone    () const;
@@ -99,6 +102,7 @@ public:
 
     void   moveDo           (const move_t move, Undo& undo);
     void   moveUndo         (const move_t move, const Undo& undo);
+    Key    computeKey       () const;
 
 private:
     void   clear            ();
@@ -111,6 +115,7 @@ private:
     int    m_op;                        //  opposite side
     int    m_castle;                    //  castling flag
     int    m_enpassant;                 //  enpassant square
+    Key    m_key;                       //  hash key
 
     bit_t  m_pieces[Color::size()][Piece::size()];
     bit_t  m_occ   [Color::size()];
@@ -157,6 +162,11 @@ inline int Board::getOp() const
 inline int Board::getEnpassant() const
 {
     return m_enpassant;
+}
+
+inline Key Board::getKey() const
+{
+    return m_key;
 }
 
 inline bool Board::isWhiteToMove() const

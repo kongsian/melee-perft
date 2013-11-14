@@ -35,6 +35,7 @@
 #include "piece.h"
 #include "rank.h"
 #include "square.h"
+#include "zorbrist.h"
 
 #include <cctype>
 #include <iostream>
@@ -77,6 +78,7 @@ Board::Board(const Board& board)
     m_op                 = board.m_op;
     m_castle             = board.m_castle;
     m_enpassant          = board.m_enpassant;
+    m_key                = board.m_key;
 
     //  bitboards
 
@@ -163,6 +165,8 @@ void Board::fromFen(const std::string& fen)
             Bit::set(m_occ[color],square);
             Bit::set(m_all,square);
 
+            m_key ^= Zorbrist::Piece[color][piece][square];
+
             ++file;
         }
 
@@ -176,6 +180,11 @@ void Board::fromFen(const std::string& fen)
     m_op        = Color::opposite(m_me);
     m_pieces_me = m_pieces[m_me];
     m_pieces_op = m_pieces[m_op];
+
+    if (isWhiteToMove())
+    {
+        m_key ^= Zorbrist::Side;
+    }
 
     //  FEN: castling availability
 
@@ -212,6 +221,7 @@ void Board::fromFen(const std::string& fen)
 
         is >> c;
     }
+    m_key ^= Zorbrist::Castle[m_castle];
 
     //  FEN: enpassant square
     //  Enpassant square is set only if it is a legal move
@@ -232,6 +242,7 @@ void Board::fromFen(const std::string& fen)
         &&  (getMyPawns() & m))                     //  friendly pawn present
         {
             m_enpassant = enpassant;
+            m_key ^= Zorbrist::Enpassant[Square::file(enpassant)];
         }
     }
 }
@@ -334,6 +345,7 @@ void Board::moveDo(const move_t move, Undo& undo)
     undo.captured  = captured;
     undo.castle    = m_castle;
     undo.enpassant = m_enpassant;
+    undo.key       = m_key;
 
     //  update board
 
@@ -350,6 +362,23 @@ void Board::moveDo(const move_t move, Undo& undo)
 
     m_castle    &= Castle::Mask[from] & Castle::Mask[to];
     m_enpassant  = Square::None;
+
+    //  update key
+
+    const auto& zme = Zorbrist::Piece[me];
+    const auto& zop = Zorbrist::Piece[op];
+
+    m_key ^= zme[piece][from] ^ zme[piece][to];
+    if (m_castle != undo.castle)
+    {
+        m_key ^= Zorbrist::Castle[m_castle ^ undo.castle];
+    }
+    m_key ^= Zorbrist::Side;
+
+    if (undo.enpassant != Square::None)
+    {
+        m_key ^= Zorbrist::Enpassant[Square::file(undo.enpassant)];
+    }
 
     //  update bitboards
 
@@ -368,12 +397,14 @@ void Board::moveDo(const move_t move, Undo& undo)
         m_piece[pawnSquare]       = Piece::None;
         m_pieces_op[Piece::Pawn] ^= bitPawn;
         m_occ[op]                ^= bitPawn;
+        m_key ^= zop[Piece::Pawn][pawnSquare];
     }
 
     else if (!Piece::isNone(captured))
     {
         m_pieces_op[captured] ^= bitTo;
         m_occ[op]             ^= bitTo;
+        m_key ^= zop[captured][to];
     }
 
     if (Move::isPromote(move))
@@ -382,6 +413,7 @@ void Board::moveDo(const move_t move, Undo& undo)
         m_piece[to]               = promote;
         m_pieces_me[Piece::Pawn] ^= bitTo;
         m_pieces_me[promote]     ^= bitTo;
+        m_key ^= zme[Piece::Pawn][to] ^ zme[promote][to];
     }
 
     else if (Move::isCastle(move))
@@ -395,6 +427,7 @@ void Board::moveDo(const move_t move, Undo& undo)
         const bit_t bitRook = Bit::make(rookFrom) | Bit::make(rookTo);
         m_pieces_me[Piece::Rook] ^= bitRook;
         m_occ[me]                ^= bitRook;
+        m_key ^= zme[Piece::Rook][rookFrom] ^ zme[Piece::Rook][rookTo];
     }
 
     else if (Move::isPawn2(move))
@@ -403,6 +436,7 @@ void Board::moveDo(const move_t move, Undo& undo)
         if (m_pieces_op[Piece::Pawn] & Bit::Pawn[me][enpassant])
         {
             m_enpassant = enpassant;
+            m_key ^= Zorbrist::Enpassant[Square::file(enpassant)];
         }
     }
 
@@ -438,6 +472,7 @@ void Board::moveUndo(const move_t move, const Undo& undo)
 
     m_castle    = undo.castle;
     m_enpassant = undo.enpassant;
+    m_key       = undo.key;
 
     //  update bitboards
 
@@ -485,4 +520,33 @@ void Board::moveUndo(const move_t move, const Undo& undo)
     }
 
     m_all = m_occ[Color::White] | m_occ[Color::Black];
+}
+
+Key Board::computeKey() const
+{
+    Key key;
+
+    bit_t b = m_all;
+    while (b)
+    {
+        const int square = Bit::pop(b);
+        const int piece  = getPiece(square);
+        const int color  = getColor(square);
+
+        key ^= Zorbrist::Piece[color][piece][square];
+    }
+
+    key ^= Zorbrist::Castle[m_castle];
+
+    if (m_enpassant != Square::None)
+    {
+        key ^= Zorbrist::Enpassant[Square::file(m_enpassant)];
+    }
+
+    if (isWhiteToMove())
+    {
+        key ^= Zorbrist::Side;
+    }
+
+    return key;
 }
