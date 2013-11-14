@@ -40,6 +40,10 @@
 
 #include <cstdint>
 #include <iostream>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 //--------------------------------------------------------------------//
 //  variables
@@ -48,6 +52,7 @@
 namespace
 {
     Table table;
+    std::mutex mutex_gen;
 }
 
 //--------------------------------------------------------------------//
@@ -56,14 +61,17 @@ namespace
 
 namespace
 {
-    uint64_t node(Board& board, const int depth);
+    uint64_t split(Board& board, const int depth, const int threads);
+    void     ply2 (Board& board, Gen& gen, uint64_t& nodes, const int depth);
+    uint64_t node (Board& board, const int depth);
 }
 
 //--------------------------------------------------------------------//
 //  functions
 //--------------------------------------------------------------------//
 
-void Perft::root(const std::string& fen, const int depth, const int size)
+void Perft::root(const std::string& fen, const int depth, const int size,
+                 const int threads)
 {
     Clock clock;
     table.alloc(size);
@@ -71,6 +79,9 @@ void Perft::root(const std::string& fen, const int depth, const int size)
     std::cout << "Table: "
               << table.size()
               << " MB\n";
+    std::cout << "Threads: "
+              << threads
+              << '\n';
     std::cout << "Depth: "
               << depth
               << std::endl;
@@ -91,7 +102,7 @@ void Perft::root(const std::string& fen, const int depth, const int size)
         if (depth > 1)
         {
             board.moveDo(move,undo);
-            nodes = node(board,depth-1);
+            nodes = split(board,depth-1,threads);
             board.moveUndo(move,undo);
         }
 
@@ -115,6 +126,74 @@ void Perft::root(const std::string& fen, const int depth, const int size)
 
 namespace
 {
+    uint64_t split(Board& board, const int depth, const int threads)
+    {
+        //  frontier
+
+        if (depth == 1)
+        {
+            Attack attack(board);
+            Genleaf gen(attack,board);
+            return gen.size();
+        }
+
+        uint64_t nodes = 0ULL;
+        Attack attack(board);
+        Gen gen(attack,board);
+
+        //  n[] will hold the perft count for each thread
+        //  a new board is created for each thread
+
+        std::vector<uint64_t> n(threads);
+        std::vector<std::thread> t(threads);
+        std::vector<std::unique_ptr<Board>> b(threads);
+
+        for (int i = 0; i < threads; ++i)
+        {
+            b[i] = std::unique_ptr<Board>(new Board(board));
+            t[i] = std::thread(ply2,
+                               std::ref(*b[i]),
+                               std::ref(gen),
+                               std::ref(n[i]),
+                               depth);
+        }
+
+        for (int i = 0; i < threads; ++i)
+        {
+            t[i].join();
+            nodes += n[i];
+        }
+
+        return nodes;
+    }
+
+    //  split at ply 2
+
+    void ply2 (Board& board, Gen& gen, uint64_t& nodes, const int depth)
+    {
+        nodes = 0ULL;
+        Board::Undo undo;
+
+        while (true)
+        {
+            //  lock the move generator
+ 
+            move_t move;
+            {
+                std::lock_guard<std::mutex> guard(mutex_gen);
+                if (!gen.hasNext())
+                {
+                    return;
+                }
+                move = gen.getNext();
+            }
+
+            board.moveDo(move,undo);
+            nodes += node(board,depth-1);
+            board.moveUndo(move,undo);
+        }
+    }
+
     uint64_t node(Board& board, const int depth)
     {
         //  frontier

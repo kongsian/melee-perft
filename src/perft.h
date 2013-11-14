@@ -39,7 +39,8 @@
 
 namespace Perft
 {
-    void root(const std::string& fen, const int depth, const int size);
+    void root(const std::string& fen, const int depth, const int size,
+              const int threads);
 }
 
 #endif  //  PERFT_H
