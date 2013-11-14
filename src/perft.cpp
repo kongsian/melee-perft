@@ -103,7 +103,7 @@ void Perft::root(const Option& option)
         }
 
         total_nodes += nodes;
-        std::cout << Move::toString(move)
+        std::cout << Move::toSan(move,board)
                   << '\t'
                   << nodes
                   << std::endl;
