@@ -33,6 +33,7 @@
 #include "board.h"
 #include "clock.h"
 #include "gen.h"
+#include "genleaf.h"
 #include "move.h"
 
 #include <cstdint>
@@ -102,14 +103,16 @@ namespace
     uint64_t node(Board& board, const int depth)
     {
         Attack attack(board);
-        Gen gen(attack,board);
 
         //  frontier
 
         if (depth == 1)
         {
+            Genleaf gen(attack,board);
             return gen.size();
         }
+
+        Gen gen(attack,board);
 
         uint64_t nodes = 0ULL;
         Board::Undo undo;
