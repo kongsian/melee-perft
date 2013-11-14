@@ -31,6 +31,7 @@
 #include "perft.h"
 #include "attack.h"
 #include "board.h"
+#include "clock.h"
 #include "gen.h"
 #include "move.h"
 
@@ -52,6 +53,8 @@ namespace
 
 void Perft::root(const std::string& fen, const int depth)
 {
+    Clock clock;
+
     std::cout << "Depth: "
               << depth
               << std::endl;
@@ -83,8 +86,14 @@ void Perft::root(const std::string& fen, const int depth)
                   << std::endl;
     }
 
-    std::cout << "TOTAL "
+    const double etime = static_cast<double>(clock.elapsed()) / 1000.0;
+
+    std::cout << "NODES "
               << total_nodes
+              << std::endl;
+    std::cout << "ETIME "
+              << etime
+              << " secs"
               << std::endl;
 }
 
