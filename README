@@ -1,0 +1,74 @@
+Melee Perft is a fast perft program written in C++11.  It features
+
+-   a legal move generator
+-   magic bitboards
+-   a hash table with 128-bits key
+-   multi-threading
+-   detects and uses hardware POPCNT
+-   Windows and Linux compiles.
+
+Syntax is
+
+melee-perft --fen <string> --depth <depth> --hash <sizeMB> --threads <num>
+
+If fen string is omitted, the start position will be used.
+
+This is a multi-threaded run with a 2GB hash table.
+
+$ ./melee-perft --depth 8 --threads 4 --hash 2048
+MeleePerft 1.0.0 by Chua Kong Sian
+Hash table: 2048 MB
+Threads: 4
+Depth: 8
+
++---+---+---+---+---+---+---+---+
+|*r |*n |*b |*q |*k |*b |*n |*r |
++---+---+---+---+---+---+---+---+
+|*p |*p |*p |*p |*p |*p |*p |*p |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+|   |   |   |   |   |   |   |   |
++---+---+---+---+---+---+---+---+
+| P | P | P | P | P | P | P | P |
++---+---+---+---+---+---+---+---+
+| R | N | B | Q | K | B | N | R |
++---+---+---+---+---+---+---+---+
+
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
+
+a2a3    2863411653
+b2b3    3579299617
+c2c3    3806229124
+d2d3    6093248619
+e2e3    8039390919
+f2f3    2728615868
+g2g3    3641432923
+h2h3    2860408680
+a2a4    3676309619
+b2b4    3569067629
+c2c4    4199667616
+d2d4    7184581950
+e2e4    8102108221
+f2f4    3199039406
+g2g4    3466204702
+h2h4    3711123115
+b1a3    3193522577
+b1c3    3926684340
+g1f3    3937354096
+g1h3    3221278282
+TOTAL 84998978956
+ETIME 8.037 secs
+
+
+Building Melee Perft
+
+To compile Melee Perft, you will need CMake, GCC and MinGW-64.  Just run the
+melee-build.sh script.  The binaries will be in the build subdirectory.
+
+Chua Kong Sian
+Nov 2013
