@@ -37,10 +37,11 @@
 //  prototypes
 //--------------------------------------------------------------------//
 
+class Option;
+
 namespace Perft
 {
-    void root(const std::string& fen, const int depth, const int size,
-              const int threads);
+    void root(const Option& option);
 }
 
 #endif  //  PERFT_H

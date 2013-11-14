@@ -35,6 +35,7 @@
 #include "gen.h"
 #include "genleaf.h"
 #include "move.h"
+#include "option.h"
 #include "table.h"
 #include "zorbrist.h"
 
@@ -51,7 +52,6 @@
 
 namespace
 {
-    Table table;
     std::mutex mutex_gen;
 }
 
@@ -70,18 +70,14 @@ namespace
 //  functions
 //--------------------------------------------------------------------//
 
-void Perft::root(const std::string& fen, const int depth, const int size,
-                 const int threads)
+void Perft::root(const Option& option)
 {
     Clock clock;
-    table.alloc(size);
 
-    std::cout << "Table: "
-              << table.size()
-              << " MB\n";
-    std::cout << "Threads: "
-              << threads
-              << '\n';
+    const std::string& fen = option.fen;
+    const int depth        = option.depth;
+    const int threads      = option.threads;
+
     std::cout << "Depth: "
               << depth
               << std::endl;

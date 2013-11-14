@@ -29,8 +29,12 @@
 //--------------------------------------------------------------------//
 
 #include "bit.h"
+#include "board.h"
 #include "magic.h"
+#include "option.h"
+#include "perft.h"
 #include "program.h"
+#include "table.h"
 #include "zorbrist.h"
 
 #include <iostream>
@@ -39,7 +43,7 @@
 //  functions
 //--------------------------------------------------------------------//
 
-int main()
+int main(int argc, char* argv[])
 {
     std::cout << Program::Name
               << ' '
@@ -53,4 +57,18 @@ int main()
     Bit::init     ();
     Magic::init   ();
     Zorbrist::init();
+
+    //  arguments
+
+    Option option(argc,argv);
+    table.alloc(option.hash);
+
+    std::cout << "Table: "
+              << table.size()
+              << " MB\n";
+    std::cout << "Threads: "
+              << option.threads
+              << '\n';
+
+    Perft::root(option);
 }
