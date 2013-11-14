@@ -20,6 +20,9 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+##  To link std::thread statically, the whole of libpthread.a 
+##  must be linked in.
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--whole-archive -lpthread -Wl,--no-whole-archive")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mpopcnt")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" CACHE STRING "" FORCE)
