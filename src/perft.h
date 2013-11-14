@@ -39,7 +39,7 @@
 
 namespace Perft
 {
-    void root(const std::string& fen, const int depth);
+    void root(const std::string& fen, const int depth, const int size);
 }
 
 #endif  //  PERFT_H

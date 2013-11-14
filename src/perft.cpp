@@ -35,9 +35,20 @@
 #include "gen.h"
 #include "genleaf.h"
 #include "move.h"
+#include "table.h"
+#include "zorbrist.h"
 
 #include <cstdint>
 #include <iostream>
+
+//--------------------------------------------------------------------//
+//  variables
+//--------------------------------------------------------------------//
+
+namespace
+{
+    Table table;
+}
 
 //--------------------------------------------------------------------//
 //  prototypes
@@ -52,10 +63,14 @@ namespace
 //  functions
 //--------------------------------------------------------------------//
 
-void Perft::root(const std::string& fen, const int depth)
+void Perft::root(const std::string& fen, const int depth, const int size)
 {
     Clock clock;
+    table.alloc(size);
 
+    std::cout << "Table: "
+              << table.size()
+              << " MB\n";
     std::cout << "Depth: "
               << depth
               << std::endl;
@@ -102,19 +117,27 @@ namespace
 {
     uint64_t node(Board& board, const int depth)
     {
-        Attack attack(board);
-
         //  frontier
 
         if (depth == 1)
         {
+            Attack attack(board);
             Genleaf gen(attack,board);
             return gen.size();
         }
 
-        Gen gen(attack,board);
+        //  probe table
 
         uint64_t nodes = 0ULL;
+        Key key = board.getKey() ^ Zorbrist::Depth[depth];
+        if (table.probe(key,nodes))
+        {
+            return nodes;
+        }
+
+        Attack attack(board);
+        Gen gen(attack,board);
+
         Board::Undo undo;
         while (gen.hasNext())
         {
@@ -124,6 +147,7 @@ namespace
             board.moveUndo(move,undo);
         }
 
+        table.store(key,nodes);
         return nodes;
     }
 }
