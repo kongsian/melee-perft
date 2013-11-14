@@ -64,6 +64,15 @@ namespace Bit
     constexpr bit_t Rank6 = 0x0000ff0000000000ULL;
     constexpr bit_t Rank7 = 0x00ff000000000000ULL;
     constexpr bit_t Rank8 = 0xff00000000000000ULL;
+
+    constexpr bit_t F1G1   = 0x0000000000000060ULL;
+    constexpr bit_t E1F1G1 = 0x0000000000000070ULL;
+    constexpr bit_t B1C1D1 = 0x000000000000000eULL;
+    constexpr bit_t C1D1E1 = 0x000000000000001cULL;
+    constexpr bit_t F8G8   = 0x6000000000000000ULL;
+    constexpr bit_t E8F8G8 = 0x7000000000000000ULL;
+    constexpr bit_t B8C8D8 = 0x0e00000000000000ULL;
+    constexpr bit_t C8D8E8 = 0x1c00000000000000ULL;
 }
 
 //--------------------------------------------------------------------//
