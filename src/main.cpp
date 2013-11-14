@@ -31,6 +31,7 @@
 #include "bit.h"
 #include "magic.h"
 #include "program.h"
+#include "zorbrist.h"
 
 #include <iostream>
 
@@ -49,6 +50,7 @@ int main()
 
     //  inits
 
-    Bit::init  ();
-    Magic::init();
+    Bit::init     ();
+    Magic::init   ();
+    Zorbrist::init();
 }
