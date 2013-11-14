@@ -34,6 +34,7 @@
 #include "bit.h"
 #include "castle.h"
 #include "color.h"
+#include "move.h"
 #include "piece.h"
 #include "square.h"
 
@@ -46,6 +47,13 @@
 class Board
 {
 public:
+    struct Undo
+    {
+        int captured;
+        int castle;
+        int enpassant;
+    };
+
     static const std::string StartFen;
     static const std::string KiwiPete;
 
@@ -88,6 +96,9 @@ public:
     bit_t  getMyOcc         () const;
     bit_t  getOpOcc         () const;
     bit_t  getAll           () const;
+
+    void   moveDo           (const move_t move, Undo& undo);
+    void   moveUndo         (const move_t move, const Undo& undo);
 
 private:
     void   clear            ();

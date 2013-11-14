@@ -319,3 +319,170 @@ void Board::print() const
               << '\n'
               << std::endl;
 }
+
+void Board::moveDo(const move_t move, Undo& undo)
+{
+    const int from     = Move::from(move);
+    const int to       = Move::to(move);
+    const int piece    = getPiece(from);
+    const int captured = getPiece(to);
+    const int me       = m_me;
+    const int op       = m_op;
+
+    //  save into undo
+
+    undo.captured  = captured;
+    undo.castle    = m_castle;
+    undo.enpassant = m_enpassant;
+
+    //  update board
+
+    m_piece[from]  = Piece::None;
+    m_piece[to]    = piece;
+
+    if (Piece::isKing(piece))
+    {
+        m_king[me] = to;
+    }
+
+    m_me = op;
+    m_op = me;
+
+    m_castle    &= Castle::Mask[from] & Castle::Mask[to];
+    m_enpassant  = Square::None;
+
+    //  update bitboards
+
+    const bit_t bitFrom = Bit::make(from);
+    const bit_t bitTo   = Bit::make(to);
+    const bit_t bitMask = bitFrom | bitTo;
+
+    m_pieces_me[piece]  ^= bitMask;
+    m_occ[me]           ^= bitMask;
+
+    if (Move::isEnpassant(move))
+    {
+        const int pawnSquare = Square::pawn(to);
+        const bit_t bitPawn  = Bit::make(pawnSquare);
+
+        m_piece[pawnSquare]       = Piece::None;
+        m_pieces_op[Piece::Pawn] ^= bitPawn;
+        m_occ[op]                ^= bitPawn;
+    }
+
+    else if (!Piece::isNone(captured))
+    {
+        m_pieces_op[captured] ^= bitTo;
+        m_occ[op]             ^= bitTo;
+    }
+
+    if (Move::isPromote(move))
+    {
+        const int promote         = Move::promote(move);
+        m_piece[to]               = promote;
+        m_pieces_me[Piece::Pawn] ^= bitTo;
+        m_pieces_me[promote]     ^= bitTo;
+    }
+
+    else if (Move::isCastle(move))
+    {
+        const int rookFrom = to   + (from < to ? 1 : -2);
+        const int rookTo   = from + (from < to ? 1 : -1);
+
+        m_piece[rookFrom]  = Piece::None;
+        m_piece[rookTo]    = Piece::Rook;
+
+        const bit_t bitRook = Bit::make(rookFrom) | Bit::make(rookTo);
+        m_pieces_me[Piece::Rook] ^= bitRook;
+        m_occ[me]                ^= bitRook;
+    }
+
+    else if (Move::isPawn2(move))
+    {
+        const int enpassant = Square::pawn(to);
+        if (m_pieces_op[Piece::Pawn] & Bit::Pawn[me][enpassant])
+        {
+            m_enpassant = enpassant;
+        }
+    }
+
+    m_pieces_me = m_pieces[op];
+    m_pieces_op = m_pieces[me];
+    m_all       = m_occ[Color::White] | m_occ[Color::Black];
+}
+
+void Board::moveUndo(const move_t move, const Undo& undo)
+{
+    const int from     = Move::from(move);
+    const int to       = Move::to(move);
+    const int piece    = getPiece(to);
+    const int captured = undo.captured;
+    const int me       = m_op;
+    const int op       = m_me;
+
+    m_pieces_me = m_pieces[me];
+    m_pieces_op = m_pieces[op];
+
+    //  update board
+
+    m_piece[from] = piece;
+    m_piece[to]   = captured;
+
+    if (Piece::isKing(piece))
+    {
+        m_king[me] = from;
+    }
+
+    m_me = me;
+    m_op = op;
+
+    m_castle    = undo.castle;
+    m_enpassant = undo.enpassant;
+
+    //  update bitboards
+
+    const bit_t bitFrom = Bit::make(from);
+    const bit_t bitTo   = Bit::make(to);
+    const bit_t bitMask = bitFrom | bitTo;
+
+    m_pieces_me[piece]  ^= bitMask;
+    m_occ[me]           ^= bitMask;
+
+    if (Move::isEnpassant(move))
+    {
+        const int pawnSquare = Square::pawn(to);
+        const bit_t bitPawn  = Bit::make(pawnSquare);
+
+        m_piece[pawnSquare]       = Piece::Pawn;
+        m_pieces_op[Piece::Pawn] ^= bitPawn;
+        m_occ[op]                ^= bitPawn;
+    }
+
+    else if (!Piece::isNone(captured))
+    {
+        m_pieces_op[captured] ^= bitTo;
+        m_occ[op]             ^= bitTo;
+    }
+
+    if (Move::isPromote(move))
+    {
+        m_piece[from]             = Piece::Pawn;
+        m_pieces_me[Piece::Pawn] ^= bitFrom;
+        m_pieces_me[piece]       ^= bitFrom;
+    }
+
+    else if (Move::isCastle(move))
+    {
+        const int rookFrom = to   + (from < to ? 1 : -2);
+        const int rookTo   = from + (from < to ? 1 : -1);
+
+        m_piece[rookFrom]  = Piece::Rook;
+        m_piece[rookTo]    = Piece::None;
+
+        const bit_t bitRook = Bit::make(rookFrom) | Bit::make(rookTo);
+        m_pieces_me[Piece::Rook] ^= bitRook;
+        m_occ[me]                ^= bitRook;
+    }
+
+    m_all = m_occ[Color::White] | m_occ[Color::Black];
+}
