@@ -58,6 +58,18 @@ namespace Castle
     constexpr bool    canE1C1 (const int castle);
     constexpr bool    canE8G8 (const int castle);
     constexpr bool    canE8C8 (const int castle);
+
+    constexpr int Mask[] =
+    {
+        ~E1C1, ~0, ~0, ~0, ~(E1C1 | E1G1), ~0, ~0, ~E1G1,
+        ~0, ~0, ~0, ~0, ~0, ~0, ~0, ~0,
+        ~0, ~0, ~0, ~0, ~0, ~0, ~0, ~0,
+        ~0, ~0, ~0, ~0, ~0, ~0, ~0, ~0,
+        ~0, ~0, ~0, ~0, ~0, ~0, ~0, ~0,
+        ~0, ~0, ~0, ~0, ~0, ~0, ~0, ~0,
+        ~0, ~0, ~0, ~0, ~0, ~0, ~0, ~0,
+        ~E8C8, ~0, ~0, ~0, ~(E8C8 | E8G8), ~0, ~0, ~E8G8,
+    };
 }
 
 //--------------------------------------------------------------------//
